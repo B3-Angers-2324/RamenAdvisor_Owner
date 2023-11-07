@@ -2,20 +2,25 @@
     export let type = "";
     export let title = "".toLowerCase();
     export let required = false;
-    export let option = {};
+
+    export let value = "";
+
+    const handleChange = (e) => {
+        value = e.target.value;
+    }
 </script>
 
 <buttonCustom>
-    {#if type!="select"}
+    {#if type=="submit"}
+        <input type="{type}" value="{title}">
+    {:else if type!="select"}
         <label for="{title}">{required ? `${title}*` : title}</label>
-        <input type="{type}" name="{title}" id="{title}" placeholder="{title}" {required}>
+        <input type="{type}" name="{title}" id="{title}" placeholder="{title}" {required} value={value} on:input={handleChange}>
     {:else}
         <label for="{title}">{title}</label>
-        <select name="{title}" id="{title}">
-            <option value="" disabled selected>---</option>
-            {#each Object.keys(option) as key}
-                <option value="{key}">{option[key]}</option>
-            {/each}
+        <select name="{title}" id="{title}" value={value} on:change={handleChange}>
+            <option value="" disabled selected>Sélectionnez une option</option>
+            <slot />
         </select>
     {/if}
 </buttonCustom>
