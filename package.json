@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
+    "file-selector": "^0.6.0",
+    "leaflet": "^1.9.4",
     "sass": "^1.69.5",
     "svelte-routing": "^2.6.0"
   }
