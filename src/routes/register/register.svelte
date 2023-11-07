@@ -111,6 +111,7 @@
 </script>
 
 <main>
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div id="container">
         {#if signIn}
             <h1>Sign In</h1>
@@ -137,6 +138,7 @@
         {/if}
         <!-- svelte-ignore a11y-missing-attribute -->
         <!-- svelte-ignore a11y-interactive-supports-focus -->
+        <!-- svelte-ignore a11y-unknown-role -->
         <a role="CustomInput" on:click={toggle} on:keydown={toggle}>
             {#if !signIn}Déja un compte?{:else}Créer un compte{/if}
         </a> 
@@ -153,9 +155,9 @@
         height: 100vh;
         display: flex;
         justify-content: center;
-        padding-top: var(--spacing);
-
+        
         #container{
+            margin-top: calc(var(--spacing) * 2);
             background-color: var(--zomp);
             width: fit-content;
             height: fit-content;
