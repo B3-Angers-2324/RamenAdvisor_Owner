@@ -19,7 +19,7 @@
     {:else}
         <label for="{title}">{title}</label>
         <select name="{title}" id="{title}" value={value} on:change={handleChange}>
-            <option value="" disabled selected>---</option>
+            <option value="" disabled selected>Sélectionnez une option</option>
             <slot />
         </select>
     {/if}

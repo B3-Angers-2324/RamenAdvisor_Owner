@@ -41,9 +41,9 @@
     });
 
     $: {
-        console.log("positions :" ,positions);
+        // console.log("positions :" ,positions);
         if(mapReady && positions != undefined){
-            console.log("showPin");
+            // console.log("showPin");
             // reset marker list
             markers.forEach(marker => map.removeLayer(marker));
             markers = [];
@@ -60,7 +60,7 @@
             //get the center of the group
             //map.setView(group.getBounds().getCenter());
             map.fitBounds(group.getBounds());
-            console.log("markers :",markers, "\n group :",group , "\n group.getBounds() :",group.getBounds(),"\n group.getBounds().getCenter() :",group.getBounds().getCenter());
+            // console.log("markers :",markers, "\n group :",group , "\n group.getBounds() :",group.getBounds(),"\n group.getBounds().getCenter() :",group.getBounds().getCenter());
 
             if (showPin) {
                 markers.forEach(marker => marker.setOpacity(1));

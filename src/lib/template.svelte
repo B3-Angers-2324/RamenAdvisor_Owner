@@ -1,5 +1,24 @@
 <script lang="ts">
-    console.log("Hello World template");
+    import { API_URL } from "../main";
+
+    let restaurants = [];
+
+    fetch(`${API_URL}/owner/restaurants`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            restaurants = data.restaurants;
+        })
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+    }
 </script>
 
 <div class="template">
@@ -18,18 +37,11 @@
             </h3>
             <!-- la liste des restaurants -->
             <div id="restaurantsList">
-                <button class="restaurant">
-                    Restaurant 1
-                    <button class="material-symbols-rounded">delete</button>
-                </button>
-                <button class="restaurant">
-                    Restaurant 2
-                    <button class="material-symbols-rounded">delete</button>
-                </button>
-                <button class="restaurant">
-                    Restaurant 3
-                    <button class="material-symbols-rounded">delete</button>
-                </button>
+                {#each restaurants as restaurant}
+                    <a href={`/restaurant/${restaurant._id}`} class="restaurant">
+                        {restaurant.name}
+                    </a>
+                {/each}
                 <button class="material-symbols-rounded add">add</button>
             </div>
         </div>
@@ -41,19 +53,15 @@
             </h3>
             <!-- la liste des commentaires -->
             <div id="commentairesList">
-                <button class="commentaire">
-                    Restaurant 1
-                </button>
-                <button class="commentaire">
-                    Restaurant 2
-                </button>
-                <button class="commentaire">
-                    Restaurant 3
-                </button>
+                {#each restaurants as restaurant}
+                    <a href={`/message/${restaurant._id}`} class="restaurant">
+                        {restaurant.name}
+                    </a>
+                {/each}
             </div>
         </div>
         <div id="logout">
-            <button>
+            <button on:click={logout}>
                 <span class="material-symbols-rounded">logout</span>
                 Disconnect
             </button>
@@ -121,7 +129,7 @@
             align-items: center;
             gap: 1em;
 
-            button{
+            a, button{
                 padding: calc(var(--spacing) / 2) calc(var(--spacing) * 2);
                 border-radius: var(--radius);
                 border: none;
@@ -174,7 +182,6 @@
 
             h3{
                 color: var(--black);
-                margin-bottom: calc(var(--spacing)/2);
                 display: flex;
                 align-items: center;
                 padding-bottom: 1em;
@@ -196,12 +203,12 @@
 
                 .restaurant,
                 .commentaire{
-                    width: 100%;
-                    height: 3em;
+                    width: 90%;
+                    min-height: 3em;
                     background-color: var(--brunswick-green);
                     border: none;
                     color: var(--bone);
-                    font-size: 1.5em;
+                    font-size: 1em;
                     font-weight: bold;
                     text-align: left;
                     padding: 0 calc(var(--spacing)/2);
@@ -217,7 +224,7 @@
                         transform: translateX(.5em);
                     }
 
-                    button{
+                    a, button{
                         background: transparent;
                         border: none;
                         color: var(--bone);
@@ -255,7 +262,7 @@
             background-color: var(--dark-bone);
             padding: calc(var(--spacing)/2);
 
-            button{
+            a, button{
                 width: 100%;
                 padding: calc(var(--spacing) / 2) 0;
                 background-color: var(--zomp);
