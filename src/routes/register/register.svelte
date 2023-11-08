@@ -54,7 +54,7 @@
                 if (data.token) {
                     error = "";
                     localStorage.setItem("token", data.token);
-                    window.location.href = "/";
+                    window.location.href = "/home";
                 } else {
                     error = data.message;
                 }
@@ -110,7 +110,7 @@
 
 </script>
 
-<main>
+<div class="mainContainer">
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div id="container">
         {#if signIn}
@@ -143,9 +143,16 @@
             {#if !signIn}Déja un compte?{:else}Créer un compte{/if}
         </a> 
     </div>
-</main>
+</div>
 
 <style lang="scss">
+    .mainContainer{
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
     .error{
         color: var(--error);
         text-align: center;
@@ -153,16 +160,15 @@
     :global(main){
         width: 100%;
         height: 100vh;
-        display: flex;
-        justify-content: center;
         
         #container{
-            margin-top: calc(var(--spacing) * 2);
             background-color: var(--zomp);
             width: fit-content;
             height: fit-content;
             padding: var(--spacing);
             border-radius: var(--radius);
+            margin: auto;
+            
 
             h1{
                 color: var(--black);
