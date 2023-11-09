@@ -1,6 +1,8 @@
 <script lang="ts">
     import { API_URL } from "../main";
 
+    import logo from '../assets/icon.png';
+
     let restaurants = [];
 
     fetch(`${API_URL}/owner/restaurants`, {
@@ -26,7 +28,7 @@
     <div id="nav">
         <!-- Le head -->
         <div id="head">
-            <img src="../src/assets/icon.png" alt="logo">
+            <img src={logo} alt="logo">
             <h1>RamenAdvisor</h1>
         </div>
         <!-- Le choix des restaurants -->

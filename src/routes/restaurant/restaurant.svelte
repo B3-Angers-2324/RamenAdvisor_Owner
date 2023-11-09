@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div id="map">
-                <Map positions={[[47.47908262135688, -0.5540509578361477]]}/>
+                <Map positions={(restaurant["position"])?[restaurant["position"]]:undefined} showPin={true}/>
             </div>
         </div>
         <div id="containerBottom">
