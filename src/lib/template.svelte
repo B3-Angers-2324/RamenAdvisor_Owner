@@ -5,6 +5,10 @@
 
     let restaurants = [];
 
+    if(!localStorage.getItem('token')){
+        window.location.href = '/';
+    }
+
     fetch(`${API_URL}/owner/restaurants`, {
             method: 'GET',
             headers: {
@@ -12,7 +16,12 @@
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             },
         })
-        .then((res) => res.json())
+        .then((res) => {
+            if(res.status == 401){
+                window.location.href = '/';
+            }
+            return res.json()
+        })
         .then((data) => {
             restaurants = data.restaurants;
         })
@@ -44,7 +53,7 @@
                         {restaurant.name}
                     </a>
                 {/each}
-                <button class="material-symbols-rounded add">add</button>
+                <a href="/restaurant/new" class="material-symbols-rounded add">add</a>
             </div>
         </div>
         <!-- Le choix des commentaires -->
@@ -252,6 +261,7 @@
                     margin-bottom: 1em;
                     border-radius: var(--radius);
                     text-align: center;
+                    line-height: 2em;
                 }
             }
         }
