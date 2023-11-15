@@ -23,7 +23,6 @@
             messageData.forEach(element => {
                 element.showDropdown = false;
             });
-            console.log(messageData);
         });
 </script>
 
@@ -46,6 +45,9 @@
             </div>
         </div>
     {/each}
+    {#if messageData.length == 0}
+        <p>Aucun commentaire</p>
+    {/if}
 </Template>
 
 
