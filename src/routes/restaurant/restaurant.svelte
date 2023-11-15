@@ -20,13 +20,15 @@
         "terrasse":"",
         "handicap":"",
         "foodtype":"",
-        "position":[47.47695783025668, -0.5553546201802775]
+        "position":undefined
     };
+    let error = "";
 
     //get id from url
     let url = window.location.href;
     let id = url.substring(url.lastIndexOf('/') + 1);
 
+    //get restaurant data if id is not "new"
     if(id != "new"){
         fetch(`${API_URL}/restaurant/id/${id}`, {
                 method: 'GET',
@@ -47,9 +49,27 @@
             })
     }
 
+    //save restaurant
     const handleSaveForm = (e) => {
         e.preventDefault();
+        //check if all required fields are filled
+        if(restaurant["name"] == "" || restaurant["address"] == "" || restaurant["city"] == "" || restaurant["handicap"] == "" || restaurant["foodtype"] == ""){
+            error = "Veuillez remplir tous les champs obligatoires";
+            return;
+        }
+        //check if adress is valid
+        if(restaurant["position"] == undefined){
+            error = "Veuillez entrer une adresse valide";
+            return;
+        }
+        //check if phone number is valid
+        if(restaurant["tel"] != "" && restaurant["tel"].length != 10){
+            error = "Veuillez entrer un numéro de téléphone valide";
+            return;
+        }
+
         if(id == "new"){
+            //create new restaurant
             fetch(`${API_URL}/restaurant`, {
                     method: 'POST',
                     headers: {
@@ -63,6 +83,7 @@
                     window.location.href = `/restaurant/${data.id}`;
                 })
         }else{
+            //update restaurant
             fetch(`${API_URL}/restaurant/id/${id}`, {
                     method: 'PUT',
                     headers: {
@@ -73,9 +94,22 @@
                 })
                 .then((res) => res.json())
                 .then((data) => {
+                    error = "Restaurant mis à jour";
                 })
-        
         }
+    }
+
+    //get position from adress
+    const handleExitAdressInput = (e) => {
+        fetch(`https://api-adresse.data.gouv.fr/search/?q=${restaurant["address"]+","+restaurant["city"]}&limit=1`)
+            .then((res) => res.json())
+            .then((data) => {
+                if(data.features.length == 0){
+                    error = "Veuillez entrer une adresse valide";
+                    return;
+                }
+                restaurant["position"] = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
+            })
     }
 </script>
 
@@ -100,8 +134,8 @@
         <div id="containerBottom">
             <div id="containerLeft">
                 <CustomInput title="Nom du restaurant" type="text" bind:value={restaurant["name"]} required/>
-                <CustomInput title="Adresse" type="text" bind:value={restaurant["address"]} required/>
-                <CustomInput title="Ville" type="text" bind:value={restaurant["city"]} required/>
+                <CustomInput title="Adresse" type="text" bind:value={restaurant["address"]} handleExitInput={handleExitAdressInput} required/>
+                <CustomInput title="Ville" type="text" bind:value={restaurant["city"]} handleExitInput={handleExitAdressInput} required/>
                 <CustomInput title="Numéro de téléphone du restaurant" bind:value={restaurant["tel"]} type="tel"/>
                 <CustomInput title="Site internet" bind:value={restaurant["web"]} type="text"/>
                 <CustomInput title="Mail" bind:value={restaurant["email"]} type="email"/>
@@ -115,7 +149,7 @@
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
-                <CustomInput title="Type de nouriture" bind:value={restaurant["foodtype"]} type="select">
+                <CustomInput title="Type de nouriture" bind:value={restaurant["foodtype"]} type="select" required>
                     <option value="asiatique">Asiatique</option>
                     <option value="burger">Burger</option>
                     <option value="francais">Français</option>
@@ -137,6 +171,7 @@
                 <!-- <CustomDropzone/> -->
             </div>
         </div>
+        <p class="error">{error}</p>
         <div id="submit">
             <button type="submit" class="material-symbols-rounded save">save</button>
             
@@ -146,6 +181,11 @@
 </Template>
 
 <style lang="scss">
+    .error{
+        color: red;
+        text-align: center;
+    }
+
     h1{
         color: var(--black);
         margin-bottom: 1em;
