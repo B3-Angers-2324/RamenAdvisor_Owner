@@ -63,6 +63,11 @@
             </div>
         </div>
         <div id="logout">
+            <a href="/edit">
+                <span class="material-symbols-rounded">
+                    manage_accounts
+                </span>
+            </a>
             <button on:click={logout}>
                 <span class="material-symbols-rounded">logout</span>
                 Disconnect
@@ -263,6 +268,7 @@
             width: calc(100% - var(--spacing));
             background-color: var(--dark-bone);
             padding: calc(var(--spacing)/2);
+            gap: 1em;
 
             a, button{
                 width: 100%;
@@ -280,8 +286,14 @@
                 align-items: center;
 
                 span{
-                    margin-right: calc(var(--spacing)/2);
                     font-size: 1.5em;
+                }
+            }
+
+            a{
+                flex: 3;
+                span{
+                    padding: 0 calc(var(--spacing) / 2);
                 }
             }
         }

@@ -5,6 +5,7 @@
   import Home from "./routes/home/home.svelte";
   import Message from "./routes/message/message.svelte";
   import Restaurant from "./routes/restaurant/restaurant.svelte";
+  import Edit from "./routes/editProfil/edit.svelte";
   export let url = "";
 </script>
 
@@ -18,6 +19,6 @@
     <Route path="/restaurant"><Home /></Route>
     <Route path="/message/:id"><Message /></Route>
     <Route path="/restaurant/:id"><Restaurant /></Route>
-
+    <Route path="/edit"><Edit/></Route>
   </Router> 
 </main>
