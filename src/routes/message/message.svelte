@@ -1,33 +1,53 @@
 <script lang="ts">
-    import Middleware from "../../routes/middleware/middleware.svelte";
     import Template from "../../lib/template.svelte";
+    import { API_URL } from "../../main";
+
+
+    //get id from url
+    let url = window.location.href;
+    let id = url.substring(url.lastIndexOf('/') + 1);
+
+    //Init the message Array
+    let messageData = [];
+
+    //Message API
+    fetch(`${API_URL}/message/restaurant/${id}?limit=${5}&offset=${0}`,{
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            messageData = data.obj;
+            messageData.forEach(element => {
+                element.showDropdown = false;
+            });
+        });
 </script>
 
 <Template>
-    <Middleware>
-        <h1>Commentaires</h1>
+    <h1>Commentaires</h1>
 
-        {#each Array(5) as _, i}
-            <div id="commentairesContainer">
-                <div id="commentaire">
-                    <div id="left">
-                        <div id="title">
-                            <h1>User {i+1}</h1>
-                            <h3>Restaurant {(Math.random() * 2 + 1).toFixed()}</h3>
-                        </div>
-                        <p>In deserunt quis proident adipisicing cillum velit incididunt reprehenderit ut dolor elit anim ipsum culpa. Veniam elit ut sint exercitation non sint. Cupidatat sunt dolore deserunt aliqua non.
-                            In deserunt quis proident adipisicing cillum velit incididunt reprehenderit ut dolor elit anim ipsum culpa. Veniam elit ut sint exercitation non sint. Cupidatat sunt dolore deserunt aliqua non.
-                            In deserunt quis proident adipisicing cillum velit incididunt reprehenderit ut dolor elit anim ipsum culpa. Veniam elit ut sint exercitation non sint. Cupidatat sunt dolore deserunt aliqua non.
-                        </p>
+    {#each messageData as msg, i}
+        <div id="commentairesContainer">
+            <div id="commentaire">
+                <div id="left">
+                    <div id="title">
+                        <h1>{msg.user.firstName} {msg.user.lastName}</h1>
+                        <h3>Restaurant {(Math.random() * 2 + 1).toFixed()}</h3>
                     </div>
-                    <div id="right">
-                        <p>{(Math.random() * 5).toFixed(1)}/5</p>
-                        <button class="material-symbols-rounded">delete</button>
-                    </div>
+                    <p>{msg.content}</p>
+                </div>
+                <div id="right">
+                    <p>{msg.note}/5</p>
                 </div>
             </div>
-        {/each}
-    </Middleware>
+        </div>
+    {/each}
+    {#if messageData.length == 0}
+        <p>Aucun commentaire</p>
+    {/if}
 </Template>
 
 
