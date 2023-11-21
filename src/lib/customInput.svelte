@@ -2,6 +2,7 @@
     export let type = "";
     export let title = "".toLowerCase();
     export let required = false;
+    export let disabled = false;
     export let handleExitInput = (e) => {};
 
     export let value = "";
@@ -28,7 +29,7 @@
         <input type="{type}" value="{title}">
     {:else if type!="select"}
         <label for="{title}">{required ? `${title} *` : title}</label>
-        <input type="{type}" name="{title}" id="{title}" placeholder="{title}" {required} value={value} on:focusout={handleExit} on:input={handleChange}>
+        <input type="{type}" name="{title}" id="{title}" placeholder="{title}" {required} {disabled} value={value} on:focusout={handleExit} on:input={handleChange}>
     {:else}
         <label for="{title}">{required ? `${title} *` : title}</label>
         <select name="{title}" id="{title}" value={value} on:change={handleChange}>
