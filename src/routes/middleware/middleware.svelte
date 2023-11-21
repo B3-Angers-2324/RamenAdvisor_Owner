@@ -1,5 +1,4 @@
 <script lang="ts">
-    console.log("Hello World");
 </script>
 
 <div class="middleware">

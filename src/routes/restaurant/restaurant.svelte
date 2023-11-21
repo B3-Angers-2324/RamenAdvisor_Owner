@@ -26,7 +26,6 @@
         .then((res) => res.json())
         .then((data) => {
             restaurant = data.obj;
-            console.log(restaurant);
         })
 </script>
 
