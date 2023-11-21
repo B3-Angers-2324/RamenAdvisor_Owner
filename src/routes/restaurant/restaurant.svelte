@@ -150,11 +150,7 @@
                     <option value="non">Non</option>
                 </CustomInput>
                 <CustomInput title="Type de nouriture" bind:value={restaurant["foodtype"]} type="select" required>
-                    <option value="asiatique">Asiatique</option>
                     <option value="burger">Burger</option>
-                    <option value="francais">Français</option>
-                    <option value="italien">Italien</option>
-                    <option value="japonais">Japonais</option>
                     <option value="kebab">Kebab</option>
                     <option value="libanais">Libanais</option>
                     <option value="marocain">Marocain</option>
