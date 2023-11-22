@@ -11,7 +11,7 @@
     let messageData = [];
 
     //Message API
-    fetch(`${API_URL}/message/restaurant/${id}?limit=${5}&offset=${0}`,{
+    fetch(`${API_URL}/message/all/restaurant/${id}?limit=${5}&offset=${0}`,{
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -19,6 +19,7 @@
         })
         .then((res) => res.json())
         .then((data) => {
+            console.log(data)
             messageData = data.obj;
             messageData.forEach(element => {
                 element.showDropdown = false;
