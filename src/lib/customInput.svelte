@@ -62,6 +62,10 @@
             &:focus{
                 outline: none;
             }
+
+            &[type="submit"]{
+                cursor: pointer;
+            }
         }
 
         /* Chrome, Safari, Edge, Opera */
