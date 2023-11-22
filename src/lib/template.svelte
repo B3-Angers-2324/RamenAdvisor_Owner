@@ -5,6 +5,10 @@
 
     let restaurants = [];
 
+    if(!localStorage.getItem('token')){
+        window.location.href = '/';
+    }
+
     fetch(`${API_URL}/owner/restaurants`, {
             method: 'GET',
             headers: {
@@ -12,7 +16,12 @@
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             },
         })
-        .then((res) => res.json())
+        .then((res) => {
+            if(res.status == 401){
+                window.location.href = '/';
+            }
+            return res.json()
+        })
         .then((data) => {
             restaurants = data.restaurants;
         })
@@ -44,7 +53,7 @@
                         {restaurant.name}
                     </a>
                 {/each}
-                <button class="material-symbols-rounded add">add</button>
+                <a href="/restaurant/new" class="material-symbols-rounded add">add</a>
             </div>
         </div>
         <!-- Le choix des commentaires -->
@@ -63,6 +72,11 @@
             </div>
         </div>
         <div id="logout">
+            <a href="/edit">
+                <span class="material-symbols-rounded">
+                    manage_accounts
+                </span>
+            </a>
             <button on:click={logout}>
                 <span class="material-symbols-rounded">logout</span>
                 Disconnect
@@ -252,6 +266,7 @@
                     margin-bottom: 1em;
                     border-radius: var(--radius);
                     text-align: center;
+                    line-height: 2em;
                 }
             }
         }
@@ -263,6 +278,7 @@
             width: calc(100% - var(--spacing));
             background-color: var(--dark-bone);
             padding: calc(var(--spacing)/2);
+            gap: 1em;
 
             a, button{
                 width: 100%;
@@ -280,8 +296,14 @@
                 align-items: center;
 
                 span{
-                    margin-right: calc(var(--spacing)/2);
                     font-size: 1.5em;
+                }
+            }
+
+            a{
+                flex: 3;
+                span{
+                    padding: 0 calc(var(--spacing) / 2);
                 }
             }
         }

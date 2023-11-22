@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Middleware from "../../routes/middleware/middleware.svelte";
     import Template from "../../lib/template.svelte";
     import CustomInput from "../../lib/customInput.svelte";
     import Map from "../../lib/map.svelte";
@@ -11,66 +10,147 @@
         "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
         "https://cdn.pixabay.com/photo/2016/11/18/14/39/beans-1834984_1280.jpg"
     ]
-    let restaurant = [];
+    let restaurant = {
+        "name":"",
+        "address":"",
+        "city":"Angers",
+        "tel":"",
+        "web":"",
+        "email":"",
+        "terrasse":"",
+        "handicap":"",
+        "foodtype":"",
+        "position":undefined
+    };
+    let error = "";
 
     //get id from url
     let url = window.location.href;
     let id = url.substring(url.lastIndexOf('/') + 1);
 
-    fetch(`${API_URL}/restaurant/id/${id}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
-        .then((res) => res.json())
-        .then((data) => {
-            restaurant = data.obj;
-        })
+    //get restaurant data if id is not "new"
+    if(id != "new"){
+        fetch(`${API_URL}/restaurant/id/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then((res) => {
+                if(res.status == 500){
+                    window.location.href = `/restaurant/new`;
+                }
+                return res.json();
+            })
+            .then((data) => {
+                Object.keys(restaurant).forEach(key => {
+                    restaurant[key] = data.obj[key] || "";
+                });
+            })
+    }
+
+    //save restaurant
+    const handleSaveForm = (e) => {
+        e.preventDefault();
+        //check if all required fields are filled
+        if(restaurant["name"] == "" || restaurant["address"] == "" || restaurant["city"] == "" || restaurant["handicap"] == "" || restaurant["foodtype"] == ""){
+            error = "Veuillez remplir tous les champs obligatoires";
+            return;
+        }
+        //check if adress is valid
+        if(restaurant["position"] == undefined){
+            error = "Veuillez entrer une adresse valide";
+            return;
+        }
+        //check if phone number is valid
+        if(restaurant["tel"] != "" && restaurant["tel"].length != 10){
+            error = "Veuillez entrer un numéro de téléphone valide";
+            return;
+        }
+
+        if(id == "new"){
+            //create new restaurant
+            fetch(`${API_URL}/restaurant`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify(restaurant)
+                })
+                .then((res) => res.json())
+                .then((data) => {
+                    window.location.href = `/restaurant/${data.id}`;
+                })
+        }else{
+            //update restaurant
+            fetch(`${API_URL}/restaurant/id/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify(restaurant)
+                })
+                .then((res) => res.json())
+                .then((data) => {
+                    error = "Restaurant mis à jour";
+                })
+        }
+    }
+
+    //get position from adress
+    const handleExitAdressInput = (e) => {
+        fetch(`https://api-adresse.data.gouv.fr/search/?q=${restaurant["address"]+","+restaurant["city"]}&limit=1`)
+            .then((res) => res.json())
+            .then((data) => {
+                if(data.features.length == 0){
+                    error = "Veuillez entrer une adresse valide";
+                    return;
+                }
+                restaurant["position"] = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
+            })
+    }
 </script>
 
 <Template>
-    <Middleware>
-        <h1>{restaurant["name"]}</h1>
-        <div id="containerTop">
-            <div id="imagesContainer">
-                <div id="mainImg">
-                    <img src="{imgUlr[0]}" alt="">
-                </div>
-                <div id="sideImgs">
-                    <img src="{imgUlr[1]}" alt="">
-                    <img src="{imgUlr[2]}" alt="">
-                    <img src="{imgUlr[3]}" alt="">
-                </div>
+    <h1>{restaurant["name"] || "Ajouter un restaurant"}</h1>
+    <div id="containerTop">
+        <div id="imagesContainer">
+            <div id="mainImg">
+                <img src="{imgUlr[0]}" alt="">
             </div>
-            <div id="map">
-                <Map positions={(restaurant["position"])?[restaurant["position"]]:undefined} showPin={true}/>
+            <div id="sideImgs">
+                <img src="{imgUlr[1]}" alt="">
+                <img src="{imgUlr[2]}" alt="">
+                <img src="{imgUlr[3]}" alt="">
             </div>
         </div>
+        <div id="map">
+            <Map positions={(restaurant["position"])?[restaurant["position"]]:undefined} showPin={true}/>
+        </div>
+    </div>
+    <form on:submit|preventDefault={handleSaveForm}>
         <div id="containerBottom">
             <div id="containerLeft">
-                <CustomInput title="Nom du restaurant" type="text" value={restaurant["name"] || ""} required/>
-                <CustomInput title="Adresse" type="text" value={restaurant["address"] || ""} required/>
-                <CustomInput title="Ville" type="text" value="Angers" required/>
-                <CustomInput title="Numéro de téléphone du restaurant" value={restaurant["tel"] || ""} type="text"/>
-                <CustomInput title="Site internet" value={restaurant["web"] || ""} type="text"/>
-                <CustomInput title="Mail" value={restaurant["email"] || ""} type="email"/>
+                <CustomInput title="Nom du restaurant" type="text" bind:value={restaurant["name"]} required/>
+                <CustomInput title="Adresse" type="text" bind:value={restaurant["address"]} handleExitInput={handleExitAdressInput} required/>
+                <CustomInput title="Ville" type="text" bind:value={restaurant["city"]} handleExitInput={handleExitAdressInput} required/>
+                <CustomInput title="Numéro de téléphone du restaurant" bind:value={restaurant["tel"]} type="tel"/>
+                <CustomInput title="Site internet" bind:value={restaurant["web"]} type="text"/>
+                <CustomInput title="Mail" bind:value={restaurant["email"]} type="email"/>
             </div>
             <div id="containerRight">
-                <CustomInput title="Terrasse accessible" value={restaurant["terrasse"] || ""} type="select">
+                <CustomInput title="Terrasse accessible" bind:value={restaurant["terrasse"]} type="select">
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
-                <CustomInput title="Accès Handicapés" value={restaurant["handicap"] || ""} type="select" required>
+                <CustomInput title="Accès Handicapés" bind:value={restaurant["handicap"]} type="select" required>
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
-                <CustomInput title="Type de nouriture" value={restaurant["foodtype"] || ""} type="select">
-                    <option value="asiatique">Asiatique</option>
+                <CustomInput title="Type de nouriture" bind:value={restaurant["foodtype"]} type="select" required>
                     <option value="burger">Burger</option>
-                    <option value="francais">Français</option>
-                    <option value="italien">Italien</option>
-                    <option value="japonais">Japonais</option>
                     <option value="kebab">Kebab</option>
                     <option value="libanais">Libanais</option>
                     <option value="marocain">Marocain</option>
@@ -87,13 +167,21 @@
                 <!-- <CustomDropzone/> -->
             </div>
         </div>
+        <p class="error">{error}</p>
         <div id="submit">
-            <button class="material-symbols-rounded save">save</button>
+            <button type="submit" class="material-symbols-rounded save">save</button>
+            
+            <!-- <button class="material-symbols-rounded">delete</button> -->
         </div>
-    </Middleware>
+    </form>
 </Template>
 
 <style lang="scss">
+    .error{
+        color: red;
+        text-align: center;
+    }
+
     h1{
         color: var(--black);
         margin-bottom: 1em;
