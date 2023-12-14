@@ -4,13 +4,9 @@
     import Map from "../../lib/map.svelte";
     import { API_URL } from "../../main";
     import { onMount } from "svelte";
+    import Modal from "../../lib/modal.svelte";
 
-    let imgUlr = [
-        "https://cdn.pixabay.com/photo/2019/02/21/19/00/restaurant-4011989_1280.jpg",
-        "https://cdn.pixabay.com/photo/2017/01/26/02/06/platter-2009590_1280.jpg",
-        "https://cdn.pixabay.com/photo/2016/11/29/12/54/cafe-1869656_1280.jpg",
-        "https://cdn.pixabay.com/photo/2016/11/18/14/39/beans-1834984_1280.jpg"
-    ]
+    let mainImage = "";
     let restaurant = {
         "name":"",
         "address":"",
@@ -21,10 +17,13 @@
         "terrasse":"",
         "handicap":"",
         "foodtype":"",
-        "position":undefined
+        "position":undefined,
+        "images": []
     };
     let error = "";
+    let imageError = "";
     var foodtypes = {};
+    let showModal = false;
 
     //get id from url
     let url = window.location.href;
@@ -54,6 +53,7 @@
                     Object.keys(restaurant).forEach(key => {
                         restaurant[key] = data.obj[key] || "";
                     });
+                    mainImage = restaurant["images"][0];
                 })
         }
     }
@@ -134,7 +134,58 @@
                 data.forEach((foodtype) => {
                     foodtypes[foodtype.name] = foodtype.imgId;
                 })
-                console.log(foodtypes);
+            })
+    }
+
+    const handleUpdateImage = (e, imageNb) => {
+        const file = e.target.files[0];
+
+        // test if the image is a jpg, jpeg or png
+        if (file.type !== "image/jpeg" && file.type !== "image/jpg" && file.type !== "image/png") {
+            imageError = "L'image doit être au format jpg, jpeg ou png";
+            getRestaurantInformation();
+            return;
+        }
+
+        // test if the image is under 15Mo
+        if (file.size > 15000000) {
+            imageError = "L'image doit être inférieur à 15Mo";
+            getRestaurantInformation();
+            return;
+        }
+
+        // upload image
+        const formData = new FormData();
+        formData.append('image', file);
+        fetch(`${API_URL}/restaurant/id/${id}/${imageNb}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+                body: formData
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                imageError = data.message;
+                getRestaurantInformation();
+            })
+    }
+
+    const handleChangeMainImage = (imageNb) => {
+        mainImage = restaurant["images"][imageNb];
+    }
+
+    const handleDeleteRestaurant = () => {
+        fetch(`${API_URL}/restaurant/id/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                },
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                //redirect to home
+                window.location.href = `/home`;
             })
     }
 </script>
@@ -144,13 +195,49 @@
     <div id="containerTop">
         <div id="imagesContainer">
             <div id="mainImg">
-                <img src="{imgUlr[0]}" alt="">
+                {#if id != "new"}
+                    {#if mainImage == "" || mainImage == undefined}
+                        <label class="overlay always" for="addImage">
+                            <span class="material-symbols-rounded">hide_image</span>
+                        </label>
+                    {:else}
+                        <img src={`${API_URL}/image/${mainImage}`} alt="">
+                    {/if}
+                {:else}
+                    <div class="overlay always">
+                        <p>Disponible après la création</p>
+                        <p>Du restaurant</p>
+                    </div>
+                {/if}
+                
             </div>
             <div id="sideImgs">
-                <img src="{imgUlr[1]}" alt="">
-                <img src="{imgUlr[2]}" alt="">
-                <img src="{imgUlr[3]}" alt="">
+                <!-- for 0 to 3 -->
+                {#each Array(3) as _, i}
+                    <!-- svelte-ignore a11y-mouse-events-have-key-events -->
+                    <!-- svelte-ignore a11y-no-static-element-interactions -->
+                    <div class="imageCard" on:mouseover={() => handleChangeMainImage(i)}>
+                        {#if id != "new"}
+                            <input type="file" id={"addImage"+i} on:change={(e) => handleUpdateImage(e, i)}>
+                            {#if restaurant["images"][i] == undefined || restaurant["images"][i] == ""}
+                                <label class="overlay always" for={"addImage"+i}>
+                                    <span class="material-symbols-rounded">add_a_photo</span>
+                                </label>
+                            {:else}
+                                <img src={`${API_URL}/image/${restaurant["images"][i]}`} alt="">
+                                <label class="overlay" for={"addImage"+i}>
+                                    <span class="material-symbols-rounded">add_a_photo</span>
+                                </label>
+                            {/if}
+                        {:else}
+                            <div class="overlay always disable">
+                                <span class="material-symbols-rounded">hide_image</span>
+                            </div>
+                        {/if}
+                    </div>
+                {/each}
             </div>
+            <p class="error">{imageError}</p>
         </div>
         <div id="map">
             <Map positions={(restaurant["position"])?[restaurant["position"]]:undefined} showPin={true}/>
@@ -188,9 +275,12 @@
         <div id="submit">
             <button type="submit" class="material-symbols-rounded save">save</button>
             
-            <!-- <button class="material-symbols-rounded">delete</button> -->
+            <button type="button" class="material-symbols-rounded delete" on:click={() => showModal = true}>delete</button>
         </div>
     </form>
+    <Modal bind:showModal validate={handleDeleteRestaurant}>
+        <h2 slot="header">Voulez-vous vraiment supprimer ce restaurant ?</h2>
+    </Modal>
 </Template>
 
 <style lang="scss">
@@ -228,13 +318,35 @@
                 width: 100%;
                 height: 66%;
                 margin-bottom: 1em;
+                position: relative;
+                border-radius: var(--radius);
+                overflow: hidden;
 
                 img{
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
-                    border-radius: var(--radius);
                     background-color: rgba(0, 0, 0, 0.15);
+                }
+
+                .overlay{
+                    position: absolute; 
+                    bottom: 0; 
+                    background: rgba(0, 0, 0, 0.5); /* Black see-through */
+                    width: 100%;
+                    height: 100%;
+                    transition: .5s ease;
+                    opacity: 1;
+                    color: white;
+                    text-align: center;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+
+                    span{
+                        font-size: 5em;
+                    }
                 }
             }
 
@@ -243,14 +355,64 @@
                 justify-content: space-between;
                 align-items: center;
                 width: 100%;
-                height: 33%;
+                height: 33%;                  
 
-                img{
+                input{
+                    width: 0.1px;
+                    height: 0.1px;
+                    opacity: 0;
+                    overflow: hidden;
+                    position: absolute;
+                    z-index: -1;
+                }
+
+                .imageCard{
                     width: 30%;
                     height: 100%;
                     object-fit: cover;
                     border-radius: var(--radius);
                     background-color: rgba(0, 0, 0, 0.15);
+                    position: relative;
+                    border-radius: var(--radius);
+                    overflow: hidden;
+
+                    .overlay{
+                        position: absolute; 
+                        bottom: 0; 
+                        background: rgba(0, 0, 0, 0.5); /* Black see-through */
+                        width: 100%;
+                        height: 100%;
+                        transition: .5s ease;
+                        opacity:0;
+                        color: white;
+                        font-size: 20px;
+                        text-align: center;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        cursor: pointer;
+
+                        &.always{
+                            opacity: 1;
+                        }
+
+                        &.disable{
+                            cursor: not-allowed;
+                        }
+                    }
+
+                    img{
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        background-color: rgba(0, 0, 0, 0.15);  
+                    }
+
+                    &:hover{
+                        .overlay{
+                            opacity: 1;
+                        }
+                    }
                 }
             }
         }
@@ -295,18 +457,27 @@
         align-items: center;
         margin: var(--spacing) 0;
 
-        .save{
+        .save, .delete{
             position: relative;
             cursor: pointer;
             padding: calc(var(--spacing) / 2) calc(var(--spacing) * 2);
             border-radius: var(--radius);
             border: none;
-            background-color: var(--brunswick-green);
             color: var(--bone);
     
             &:focus{
                 outline: none;
             }
         }
+
+        .save{
+            background-color: var(--brunswick-green);
+        }
+        .delete{
+            margin-left: 2em;
+            background-color: var(--danger);
+        }
+
+
     }
 </style>
