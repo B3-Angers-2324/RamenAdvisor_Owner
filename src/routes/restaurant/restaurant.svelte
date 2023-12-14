@@ -3,6 +3,7 @@
     import CustomInput from "../../lib/customInput.svelte";
     import Map from "../../lib/map.svelte";
     import { API_URL } from "../../main";
+    import { onMount } from "svelte";
 
     let imgUlr = [
         "https://cdn.pixabay.com/photo/2019/02/21/19/00/restaurant-4011989_1280.jpg",
@@ -23,30 +24,38 @@
         "position":undefined
     };
     let error = "";
+    var foodtypes = {};
 
     //get id from url
     let url = window.location.href;
     let id = url.substring(url.lastIndexOf('/') + 1);
 
-    //get restaurant data if id is not "new"
-    if(id != "new"){
-        fetch(`${API_URL}/restaurant/id/${id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then((res) => {
-                if(res.status == 500){
-                    window.location.href = `/restaurant/new`;
-                }
-                return res.json();
-            })
-            .then((data) => {
-                Object.keys(restaurant).forEach(key => {
-                    restaurant[key] = data.obj[key] || "";
-                });
-            })
+    onMount(() => {
+        getAllFoodTypes();
+        getRestaurantInformation();
+    })
+
+    const getRestaurantInformation = () => {
+        //get restaurant data if id is not "new"
+        if(id != "new"){
+            fetch(`${API_URL}/restaurant/id/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then((res) => {
+                    if(res.status == 500){
+                        window.location.href = `/restaurant/new`;
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    Object.keys(restaurant).forEach(key => {
+                        restaurant[key] = data.obj[key] || "";
+                    });
+                })
+        }
     }
 
     //save restaurant
@@ -111,6 +120,23 @@
                 restaurant["position"] = [data.features[0].geometry.coordinates[1], data.features[0].geometry.coordinates[0]];
             })
     }
+
+    const getAllFoodTypes = () => {
+        foodtypes = {};
+        fetch(`${API_URL}/foodtype`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then((res) => res.json())
+            .then((data) => {
+                data.forEach((foodtype) => {
+                    foodtypes[foodtype.name] = foodtype.imgId;
+                })
+                console.log(foodtypes);
+            })
+    }
 </script>
 
 <Template>
@@ -150,18 +176,9 @@
                     <option value="non">Non</option>
                 </CustomInput>
                 <CustomInput title="Type de nouriture" bind:value={restaurant["foodtype"]} type="select" required>
-                    <option value="burger">Burger</option>
-                    <option value="kebab">Kebab</option>
-                    <option value="libanais">Libanais</option>
-                    <option value="marocain">Marocain</option>
-                    <option value="pizzeria">Pizzeria</option>
-                    <option value="salade">Salade</option>
-                    <option value="sandwich">Sandwich</option>
-                    <option value="tapas">Tapas</option>
-                    <option value="thai">Thaï</option>
-                    <option value="vietnamien">Vietnamien</option>
-                    <option value="local_pizza">Pizza Local</option>
-                    <option value="lunch_dining">Lunch</option>
+                    {#each Object.keys(foodtypes) as foodtype}
+                        <option value={foodtype}>{foodtype}</option>
+                    {/each}
                 </CustomInput>
                 <p>Menu</p>
                 <!-- <CustomDropzone/> -->
