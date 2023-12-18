@@ -34,8 +34,6 @@
         const apiRequest = API_URL + new URL(e.target.action).pathname;
 
         let passwordHash = SHA256(password).toString();
-
-        console.log(passwordHash)
         
         const data = {
             email: email,
