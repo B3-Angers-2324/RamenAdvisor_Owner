@@ -15,11 +15,12 @@
         "web":"",
         "email":"",
         "terrasse":"",
-        "accessible":"",
+        "accessible":false,
         "foodtype":"",
         "position":undefined,
         "images": []
     };
+    let accessible = "non";
     let error = "";
     let imageError = "";
     var foodtypes = {};
@@ -52,7 +53,9 @@
                 .then((data) => {
                     Object.keys(restaurant).forEach(key => {
                         restaurant[key] = data.obj[key] || "";
+                        if(key == "accessible") accessible = data.obj[key] ? "oui" : "non";
                     });
+                    console.log(restaurant);
                     mainImage = restaurant["images"][0];
                 })
         }
@@ -62,7 +65,7 @@
     const handleSaveForm = (e) => {
         e.preventDefault();
         //check if all required fields are filled
-        if(restaurant["name"] == "" || restaurant["address"] == "" || restaurant["city"] == "" || restaurant["accessible"] == "" || restaurant["foodtype"] == ""){
+        if(restaurant["name"] == "" || restaurant["address"] == "" || restaurant["city"] == "" || accessible == "" || restaurant["foodtype"] == ""){
             error = "Veuillez remplir tous les champs obligatoires";
             return;
         }
@@ -77,6 +80,8 @@
             return;
         }
 
+        restaurant["accessible"] = (accessible == "oui") ? true : false;
+        console.log(restaurant);
         if(id == "new"){
             //create new restaurant
             fetch(`${API_URL}/restaurant`, {
@@ -258,7 +263,7 @@
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
-                <CustomInput title="Accès Handicapés" bind:value={restaurant["accessible"]} type="select" required>
+                <CustomInput title="Accès Handicapés" bind:value={accessible} type="select" required>
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
