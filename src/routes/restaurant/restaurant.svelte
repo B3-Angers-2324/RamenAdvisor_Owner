@@ -15,7 +15,7 @@
         "web":"",
         "email":"",
         "terrasse":"",
-        "handicap":"",
+        "accessible":"",
         "foodtype":"",
         "position":undefined,
         "images": []
@@ -62,7 +62,7 @@
     const handleSaveForm = (e) => {
         e.preventDefault();
         //check if all required fields are filled
-        if(restaurant["name"] == "" || restaurant["address"] == "" || restaurant["city"] == "" || restaurant["handicap"] == "" || restaurant["foodtype"] == ""){
+        if(restaurant["name"] == "" || restaurant["address"] == "" || restaurant["city"] == "" || restaurant["accessible"] == "" || restaurant["foodtype"] == ""){
             error = "Veuillez remplir tous les champs obligatoires";
             return;
         }
@@ -258,7 +258,7 @@
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
-                <CustomInput title="Accès Handicapés" bind:value={restaurant["handicap"]} type="select" required>
+                <CustomInput title="Accès Handicapés" bind:value={restaurant["accessible"]} type="select" required>
                     <option value="oui">Oui</option>
                     <option value="non">Non</option>
                 </CustomInput>
