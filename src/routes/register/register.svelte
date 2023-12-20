@@ -109,7 +109,7 @@
                 if (data.token) {
                     error = "";
                     localStorage.setItem("token", data.token);
-                    window.location.href = "/home";
+                    window.location.href = "/?error=I_AM_A_TEAPOT";
                 } else {
                     error = data.message;
                 }
