@@ -2,6 +2,7 @@
     import CustomInput from "../../lib/customInput.svelte";
     import SHA256 from 'crypto-js/sha256';
     import { API_URL } from "../../main";
+    import { onMount } from "svelte";
 
     let signIn = true;
 
@@ -15,6 +16,16 @@
     let siret = "";
 
     let error = "";
+    
+    onMount(() => {
+        const url = new URL(window.location.href);
+        const params = new URLSearchParams(url.search);
+        let par = params.get('error');
+        console.log(par);
+        if(par){
+            error = "You'r account is being validated by an admin";
+        }
+    })
 
     let toggle = () => {
         window.scrollTo(0, 0);
@@ -34,7 +45,6 @@
         const apiRequest = API_URL + new URL(e.target.action).pathname;
 
         let passwordHash = SHA256(password).toString();
-
         
         const data = {
             email: email,
@@ -99,7 +109,7 @@
                 if (data.token) {
                     error = "";
                     localStorage.setItem("token", data.token);
-                    window.location.href = "/home";
+                    window.location.href = "/?error=I_AM_A_TEAPOT";
                 } else {
                     error = data.message;
                 }

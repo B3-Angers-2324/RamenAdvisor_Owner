@@ -19,7 +19,6 @@
         })
         .then((res) => res.json())
         .then((data) => {
-            console.log(data)
             messageData = data.obj;
             messageData.forEach(element => {
                 element.showDropdown = false;

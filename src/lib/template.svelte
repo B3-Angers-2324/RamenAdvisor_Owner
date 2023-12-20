@@ -17,10 +17,13 @@
             },
         })
         .then((res) => {
-            if(res.status == 401){
+            if(res.status == 418){
+                window.location.href = '/?error=I_AM_A_TEAPOT';
+            }else if(res.status == 401){
                 window.location.href = '/';
+            }else{
+                return res.json()
             }
-            return res.json()
         })
         .then((data) => {
             restaurants = data.restaurants;
